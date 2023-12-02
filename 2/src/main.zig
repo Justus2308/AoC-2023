@@ -1,6 +1,7 @@
 const std = @import("std");
-const mem = std.mem;
 const fmt = std.fmt;
+const meta = std.meta;
+const mem = std.mem;
 
 
 const Color = enum(u32) {
@@ -27,7 +28,7 @@ pub fn day2(reader: anytype) !struct { u64, u64 } {
 
 		var possible = true;
 		var mins = Mins {};
-		
+
 		var buf: [256]u8 = undefined;
 		const read = try reader.readUntilDelimiter(&buf, '\n');
 		var rounds = mem.tokenizeScalar(u8, read, ';');
@@ -42,7 +43,7 @@ pub fn day2(reader: anytype) !struct { u64, u64 } {
 				const col_chars = pair.next() orelse return error.ParseError;
 
 				const num = try fmt.parseInt(u32, num_chars, 10);
-				const col = std.meta.stringToEnum(Color, col_chars) orelse return error.ParseError;
+				const col = meta.stringToEnum(Color, col_chars) orelse return error.ParseError;
 
 				switch (col) {
 					inline else => |c| {
@@ -54,7 +55,10 @@ pub fn day2(reader: anytype) !struct { u64, u64 } {
 			}
 		}
 		if (possible) total += game_num;
-		powers += mins.red * mins.green * mins.blue;
+
+		var power: u64 = 1;
+		inline for (meta.fields(Mins)) |f| power *= @field(mins, f.name);
+		powers += power;
 	}
 	return .{ total, powers };
 }
